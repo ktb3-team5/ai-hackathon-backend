@@ -1,10 +1,11 @@
 package ktb.team5.ai.entity;
 
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
@@ -23,10 +24,39 @@ public class User {
     @Column(name = "tags")
     private String tags;
 
-    public static User of(String sessionId, String tags) {
+    public static User of(String sessionId) {
         User user = new User();
         user.sessionId = sessionId;
-        user.tags = tags;
         return user;
+    }
+
+    public void setTags(List<String> tags) {
+        this.tags = toString(tags);
+    }
+
+    public List<String> getTags() {
+        return fromString(this.tags);
+    }
+
+    private String toString(List<String> tags) {
+        if (tags == null || tags.isEmpty()) {
+            return "";
+        }
+
+        return tags.stream()
+                .map(String::trim)
+                .filter(s -> !s.isEmpty())
+                .collect(Collectors.joining(","));
+    }
+
+    private List<String> fromString(String tags) {
+        if (tags == null || tags.isBlank()) {
+            return List.of();
+        }
+
+        return Arrays.stream(tags.split(","))
+                .map(String::trim)
+                .filter(s -> !s.isEmpty())
+                .toList();
     }
 }
