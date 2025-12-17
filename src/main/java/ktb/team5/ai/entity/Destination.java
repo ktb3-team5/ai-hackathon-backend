@@ -3,6 +3,10 @@ package ktb.team5.ai.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Getter
@@ -34,7 +38,7 @@ public class Destination {
     private Double longitude;
 
     @Column(name = "tag")
-    private String tag;
+    private String tags;
 
     public static Destination of(
             Media media,
@@ -43,7 +47,7 @@ public class Destination {
             String description,
             Double latitude,
             Double longitude,
-            String tag
+            List<String> tags
     ) {
         Destination dest = new Destination();
         dest.media = media;
@@ -52,7 +56,37 @@ public class Destination {
         dest.description = description;
         dest.latitude = latitude;
         dest.longitude = longitude;
-        dest.tag = tag;
+        dest.tags = toString(tags);
         return dest;
+    }
+
+    public void setTags(List<String> tags) {
+        this.tags = toString(tags);
+    }
+
+    public List<String> getTags() {
+        return fromString(this.tags);
+    }
+
+    private static String toString(List<String> tags) {
+        if (tags == null || tags.isEmpty()) {
+            return "";
+        }
+
+        return tags.stream()
+                .map(String::trim)
+                .filter(s -> !s.isEmpty())
+                .collect(Collectors.joining(","));
+    }
+
+    private static List<String> fromString(String tags) {
+        if (tags == null || tags.isBlank()) {
+            return List.of();
+        }
+
+        return Arrays.stream(tags.split(","))
+                .map(String::trim)
+                .filter(s -> !s.isEmpty())
+                .toList();
     }
 }
