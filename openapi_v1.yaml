@@ -1,0 +1,309 @@
+openapi: 3.0.0
+info:
+  title: K-Culture Trip API
+  description: |
+    K-Culture 기반 개인화 여행 서비스 API 명세서 (User Request Update).
+    세션 기반으로 사용자를 식별하며, 인기 리스트와 개인화된 리스트/상세 정보를 제공합니다.
+  version: 2.0.0
+servers:
+  - url: https://api.k-culture-trip.com
+    description: Production Server
+
+components:
+  schemas:
+    # --- 1. 세션(Session) 스키마 ---
+    SessionInitRequest:
+      type: object
+      description: "로그인 또는 비회원 접속 시 세션 생성 요청"
+      properties:
+        deviceUuid:
+          type: string
+          description: "기기 고유 식별자 (비회원 식별용)"
+          example: "550e8400-e29b-41d4-a716-446655440000"
+
+    SessionResponse:
+      type: object
+      properties:
+        sessionId:
+          type: string
+          description: "발급된 세션 ID (이후 요청의 Path 파라미터로 사용)"
+          example: "sess_abc12345"
+        isNewUser:
+          type: boolean
+          description: "신규 유저 여부 (true면 취향 수집 필요)"
+          example: true
+
+    # --- 2. 취향(Preferences) 스키마 ---
+    PreferenceRequest:
+      type: object
+      required:
+        - sessionId
+        - tags
+      properties:
+        sessionId:
+          type: string
+          example: "sess_abc12345"
+        tags:
+          type: array
+          description: "수집된 취향 태그 목록"
+          items:
+            type: string
+          example: ["#BTS", "#사진촬영", "#힐링"]
+        surveyResult:
+          type: object
+          description: "설문/밸런스게임 상세 결과 (Optional)"
+          properties:
+            favoriteStar:
+              type: string
+              example: "V(BTS)"
+            travelStyle:
+              type: string
+              enum: [PHOTO, FOOD, HEALING]
+              example: "PHOTO"
+
+    # --- 3. 미디어(Media) 목록 스키마 ---
+    MediaItem:
+      type: object
+      properties:
+        mediaId:
+          type: integer
+          example: 101
+        title:
+          type: string
+          example: "봄날 뮤비 촬영지"
+        thumbnailUrl:
+          type: string
+          example: "https://cdn.example.com/thumb/101.jpg"
+        rank:
+          type: integer
+          description: "인기 순위 (TOP10 API에서 사용)"
+          example: 1
+
+    MediaListResponse:
+      type: object
+      properties:
+        listType:
+          type: string
+          enum: [TOP10, PERSONAL]
+          example: "TOP10"
+        count:
+          type: integer
+          example: 10
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/MediaItem'
+
+    # --- 4. 상세(Detail) 스키마 ---
+    # 표준/개인화 공통 기본 정보
+    LocationBasicInfo:
+      type: object
+      properties:
+        address:
+          type: string
+          example: "강원도 강릉시 주문진읍"
+        operationHours:
+          type: string
+          example: "24시간 개방"
+
+    # 개인화 컨텍스트 데이터
+    ContextData:
+      type: object
+      properties:
+        contextType:
+          type: string
+          enum: [STANDARD, PHOTO, FOOD]
+          example: "PHOTO"
+        highlightTitle:
+          type: string
+          description: "개인화된 강조 문구"
+          example: "📸 뷔처럼 인생샷 찍는 각도"
+        recommendations:
+          type: array
+          items:
+            type: string
+          example: ["오후 4시 노을 타임", "삼각대 필수"]
+
+    DetailResponse:
+      type: object
+      properties:
+        mediaId:
+          type: integer
+        locationName:
+          type: string
+          example: "주문진 향호해변"
+        basicInfo:
+          $ref: '#/components/schemas/LocationBasicInfo'
+        contextData:
+          $ref: '#/components/schemas/ContextData'
+
+paths:
+  # ----------------------------
+  # 1. 세션 로그인
+  # ----------------------------
+  /api/sessions:
+    post:
+      summary: 세션 로그인 (세션 생성)
+      tags:
+        - 1. Session & Auth
+      description: 앱 실행 시 최초 호출하여 세션 ID를 발급받습니다.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SessionInitRequest'
+      responses:
+        '200':
+          description: 세션 발급 성공
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionResponse'
+
+  # ----------------------------
+  # 2. 취향 정보 수집
+  # ----------------------------
+  /api/preferences:
+    post:
+      summary: 취향 정보 수집 및 저장
+      tags:
+        - 2. Preferences
+      description: 설문조사 또는 챗봇을 통해 수집된 사용자의 취향 정보를 세션에 저장합니다.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PreferenceRequest'
+      responses:
+        '200':
+          description: 저장 성공
+          content:
+            application/json:
+              example:
+                message: "취향 정보가 반영되었습니다."
+
+  # ----------------------------
+  # 3. 인기 미디어 TOP10 목록 조회
+  # ----------------------------
+  /api/media/top10:
+    get:
+      summary: 인기 미디어 TOP10 목록 조회
+      tags:
+        - 3. Media List (General)
+      description: 세션 없이도 접근 가능한 대중적인 인기 미디어 10개를 반환합니다.
+      responses:
+        '200':
+          description: 조회 성공
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MediaListResponse'
+
+  # ----------------------------
+  # 4. 미디어 추천 여행지 목록 조회 (표준 상세)
+  # ----------------------------
+  /api/media/{mediaId}:
+    get:
+      summary: 여행지 상세 화면 API 명세 (표준)
+      tags:
+        - 4. Detail (Standard)
+      description: |
+        특정 미디어(mediaId)와 연결된 여행지의 **표준(Standard)** 정보를 조회합니다.
+        개인화 데이터가 없거나 로그아웃 상태일 때 호출합니다.
+      parameters:
+        - name: mediaId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 성공
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DetailResponse'
+              example:
+                mediaId: 101
+                locationName: "주문진 향호해변"
+                basicInfo:
+                  address: "강원도 강릉시 주문진읍"
+                  operationHours: "24시간"
+                contextData:
+                  contextType: "STANDARD"
+                  highlightTitle: "방탄소년단 '봄날' 촬영지"
+                  recommendations: ["버스 정류장 포토존", "주변 해수욕장"]
+
+  # ----------------------------
+  # 5. 사용자 맞춤 미디어 목록 조회
+  # ----------------------------
+  /api/sessions/{sessionId}/media:
+    get:
+      summary: 사용자 맞춤 미디어 목록 조회
+      tags:
+        - 5. Media List (Personalized)
+      description: |
+        특정 세션(sessionId)의 취향 데이터를 기반으로 추천된 미디어 목록을 반환합니다.
+        (요청하신 경로의 {mediaId}는 목록 조회 성격에 맞지 않아 제거하고 collection 형태로 정의했습니다)
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 성공
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MediaListResponse'
+              example:
+                listType: "PERSONAL"
+                count: 5
+                items:
+                  - mediaId: 101
+                    title: "뷔가 사랑한 제주"
+                    thumbnailUrl: "..."
+                  - mediaId: 205
+                    title: "도깨비 공유의 산책로"
+                    thumbnailUrl: "..."
+
+  # ----------------------------
+  # 6. 여행지 상세 화면 API 명세 (사용자화)
+  # ----------------------------
+  /api/sessions/{sessionId}/media/{mediaId}:
+    get:
+      summary: 여행지 상세 화면 API 명세 (사용자화)
+      tags:
+        - 6. Detail (Personalized)
+      description: |
+        특정 세션(sessionId)의 취향(Context)을 반영하여 재구성된 여행지 상세 정보를 조회합니다.
+        예: 사진 촬영 선호 유저에게는 포토존 정보를 최상단에 노출.
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: mediaId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 성공
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DetailResponse'
+              example:
+                mediaId: 101
+                locationName: "주문진 향호해변"
+                basicInfo:
+                  address: "강원도 강릉시 주문진읍"
+                contextData:
+                  contextType: "PHOTO"
+                  highlightTitle: "📸 아미(ARMY)를 위한 인생샷 가이드"
+                  recommendations: ["오후 5시 노을 추천", "정류장 정면 샷"]
