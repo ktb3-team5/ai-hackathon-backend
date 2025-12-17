@@ -21,7 +21,7 @@ public class UserController {
         userService.createUser(sessionId);
     }
 
-    @PostMapping("/preferences")
+    @PostMapping("/me/tags")
     @ResponseStatus(HttpStatus.CREATED)
     public void createUserPreferences(
             HttpServletRequest httpRequest,
