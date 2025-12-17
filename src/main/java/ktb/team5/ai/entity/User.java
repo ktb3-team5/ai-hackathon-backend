@@ -38,7 +38,7 @@ public class User {
         return fromString(this.tags);
     }
 
-    private String toString(List<String> tags) {
+    private static String toString(List<String> tags) {
         if (tags == null || tags.isEmpty()) {
             return "";
         }
@@ -49,7 +49,7 @@ public class User {
                 .collect(Collectors.joining(","));
     }
 
-    private List<String> fromString(String tags) {
+    private static List<String> fromString(String tags) {
         if (tags == null || tags.isBlank()) {
             return List.of();
         }
