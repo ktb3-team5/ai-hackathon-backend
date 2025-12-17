@@ -1,6 +1,18 @@
 spring:
-  application:
-    name: ai
+  datasource:
+    url: jdbc:mysql://hkt-db.cz2kwkas2g77.ap-northeast-2.rds.amazonaws.com:3306/community?allowPublicKeyRetrieval=true&useSSL=false
+    username: admin
+    password: hackerton05
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jackson:
+    property-naming-strategy: SNAKE_CASE
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
 
   profiles:
-    active: local
+    active: prod

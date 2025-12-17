@@ -1,7 +1,10 @@
 package ktb.team5.ai.service;
 
+import ktb.team5.ai.dto.MediaResponse;
 import ktb.team5.ai.dto.MediaTopResponse;
+import ktb.team5.ai.entity.User;
 import ktb.team5.ai.repository.MediaRepository;
+import ktb.team5.ai.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -12,7 +15,9 @@ import java.util.List;
 @RequiredArgsConstructor
 public class MediaService {
 
+    private final UserRepository userRepository;
     private final MediaRepository mediaRepository;
+    private final AiClient aiClient;
 
     public List<MediaTopResponse> getTop10Media() {
 
@@ -87,5 +92,23 @@ public class MediaService {
                         .posterUrl("https://example.com/poster3.jpg")
                         .build()
         );
+    }
+
+    public List<MediaResponse> getMediaByTags(String sessionId) {
+
+        User user = userRepository.findBySessionId(sessionId)
+                .orElse(null);
+
+        if (user == null) {
+            throw new RuntimeException("사용자가 없습니다.");
+        }
+
+        List<String> tags = user.getTags();
+
+        if (tags.isEmpty()) {
+            throw new RuntimeException("사용자 태그가 없습니다.");
+        }
+
+        return aiClient.recommendMedia(tags);
     }
 }

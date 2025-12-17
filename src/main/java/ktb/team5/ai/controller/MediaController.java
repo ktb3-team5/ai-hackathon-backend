@@ -3,10 +3,12 @@ package ktb.team5.ai.controller;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import ktb.team5.ai.dto.DestinationsResponse;
+import ktb.team5.ai.dto.MediaResponse;
 import ktb.team5.ai.dto.MediaTopResponse;
 import ktb.team5.ai.service.DestinationService;
 import ktb.team5.ai.service.MediaService;
 import lombok.AllArgsConstructor;
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -41,4 +43,10 @@ public class MediaController {
         return destinationService.getTop5Destinations(sessionId, mediaId);
     }
 
+    @GetMapping
+    public List<MediaResponse> getMedia(HttpServletRequest httpRequest) {
+        String sessionId = httpRequest.getSession(false).getId();
+
+        return mediaService.getMediaByTags(sessionId);
+    }
 }
