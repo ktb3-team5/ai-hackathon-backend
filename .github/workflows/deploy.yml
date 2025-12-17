@@ -43,14 +43,16 @@ jobs:
             echo "===== 1. 프로젝트 클론/업데이트 ====="
             APP_DIR="/home/ubuntu/ai-hackathon-backend"
             REPO_URL="https://github.com/ktb3-team5/ai-hackathon-backend.git"
+            BRANCH="feat/cicd"
 
             if [ ! -d "$APP_DIR" ]; then
-              git clone $REPO_URL $APP_DIR
+              git clone -b $BRANCH $REPO_URL $APP_DIR
             fi
 
             cd $APP_DIR
             git fetch origin
-            git reset --hard origin/main
+            git checkout $BRANCH
+            git reset --hard origin/$BRANCH
 
             echo "===== 2. Docker 이미지 빌드 ====="
             docker build -t backend:latest .
