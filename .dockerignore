@@ -1,0 +1,31 @@
+# ============================================
+# Docker 빌드 시 제외할 파일/폴더
+# ============================================
+
+# Git
+.git
+.gitignore
+
+# Gradle
+.gradle
+build
+!gradle/wrapper/gradle-wrapper.jar
+
+# IDE
+.idea
+*.iml
+.vscode
+*.swp
+
+# 문서
+*.md
+LICENSE
+openapi_v1.yaml
+
+# 로컬 환경 파일
+.env
+.env.local
+*.log
+
+# 테스트
+src/test
