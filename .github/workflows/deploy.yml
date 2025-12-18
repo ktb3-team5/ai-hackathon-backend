@@ -29,7 +29,7 @@ jobs:
             echo "===== 1. 프로젝트 클론/업데이트 ====="
             APP_DIR="/home/ubuntu/ai-hackathon-backend"
             REPO_URL="https://github.com/ktb3-team5/ai-hackathon-backend.git"
-            BRANCH="feat/cicd"
+            BRANCH="main"
 
             if [ ! -d "$APP_DIR" ]; then
               git clone -b $BRANCH $REPO_URL $APP_DIR
