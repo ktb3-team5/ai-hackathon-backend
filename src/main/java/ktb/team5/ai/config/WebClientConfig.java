@@ -2,22 +2,29 @@ package ktb.team5.ai.config;
 
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
+
+import java.time.Duration;
 
 @Configuration
 public class WebClientConfig {
 
     @Bean
     @Qualifier("aiWebClient")
-    public WebClient aiWebClient(
+    public RestTemplate aiRestTemplate(
+            RestTemplateBuilder builder,
             @Value("${ai.server.base-url:http://localhost:8000}") String baseUrl
     ) {
-        return WebClient.builder()
-                .baseUrl(baseUrl)
+        return builder
+                .rootUri(baseUrl)
+                .setConnectTimeout(Duration.ofSeconds(5))
+                .setReadTimeout(Duration.ofSeconds(5))
                 .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .build();
     }

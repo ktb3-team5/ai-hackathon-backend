@@ -8,6 +8,7 @@ import ktb.team5.ai.repository.DestinationRepository;
 import ktb.team5.ai.repository.MediaRepository;
 import ktb.team5.ai.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -64,10 +65,12 @@ public class DestinationService {
         });
 
         return destinations.stream()
+                .limit(5)  // AI가 반환한 개수에 따라 3~5개 반환 (최대 5개)
                 .map(destination -> new DestinationsResponse(
                         destination.getName(),
                         destination.getAddress(),
                         destination.getDescription(),
+                        getImagePath(destination),
                         destination.getGoogleStreetViewUrl()
                 )).toList();
     }
@@ -98,7 +101,59 @@ public class DestinationService {
                         destination.getName(),
                         destination.getAddress(),
                         destination.getDescription(),
+                        getImagePath(destination),
                         destination.getGoogleStreetViewUrl()
                 )).toList();
+    }
+
+    private String getImagePath(Destination destination) {
+        String basePath = "/api/images/destinations/";
+        String resourceBasePath = "static/images/destinations/";
+        String[] extensions = {".png", ".jpg", ".jpeg", ".PNG", ".JPG", ".JPEG"};
+
+        // 1. imageUrl (한글 파일명)이 있으면 해당 파일 검색
+        if (destination.getImageUrl() != null && !destination.getImageUrl().isEmpty()) {
+            String imageUrl = destination.getImageUrl();
+
+            // 이미 /api/images/로 시작하면 그대로 반환
+            if (imageUrl.startsWith("/api/images/")) {
+                return imageUrl;
+            }
+
+            // /images/로 시작하면 /api 붙여서 반환
+            if (imageUrl.startsWith("/images/")) {
+                return "/api" + imageUrl;
+            }
+
+            // 한글 파일명으로 실제 파일 검색
+            for (String ext : extensions) {
+                String resourcePath = resourceBasePath + imageUrl + ext;
+                try {
+                    ClassPathResource resource = new ClassPathResource(resourcePath);
+                    if (resource.exists()) {
+                        return basePath + imageUrl + ext;
+                    }
+                } catch (Exception e) {
+                    // 파일이 없으면 다음 확장자 시도
+                }
+            }
+        }
+
+        // 2. imageUrl로 못 찾았으면 destination ID 기반으로 검색
+        Long id = destination.getId();
+        for (String ext : extensions) {
+            String resourcePath = resourceBasePath + id + ext;
+            try {
+                ClassPathResource resource = new ClassPathResource(resourcePath);
+                if (resource.exists()) {
+                    return basePath + id + ext;
+                }
+            } catch (Exception e) {
+                // 파일이 없으면 다음 확장자 시도
+            }
+        }
+
+        // 3. 파일을 찾지 못하면 첫 번째 이미지를 기본값으로 사용
+        return "/api/images/destinations/주문진영진해변방사제.png";
     }
 }

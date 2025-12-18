@@ -5,12 +5,13 @@ import ktb.team5.ai.dto.AiRecommendResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.http.HttpStatusCode;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
+import org.springframework.web.client.RestTemplate;
 
-import java.time.Duration;
 import java.util.List;
 
 @Component
@@ -19,27 +20,28 @@ import java.util.List;
 public class AiClient {
 
     @Qualifier("aiWebClient")
-    private final WebClient aiWebClient;
+    private final RestTemplate aiRestTemplate;
 
     public List<Long> recommendDestinations(Long mediaId, List<String> tags) {
         try {
-            AiRecommendResponse response = aiWebClient.post()
-                    .uri("/api/recommendation/content-based")
-                    .bodyValue(new AiRecommendRequest(mediaId, tags))
-                    .retrieve()
-                    .onStatus(
-                            HttpStatusCode::isError,
-                            clientResponse -> clientResponse
-                                    .bodyToMono(String.class)
-                                    .doOnNext(body ->
-                                            log.error("AI server error: {}", body))
-                                    .then(Mono.error(new RuntimeException("AI server error")))
-                    )
-                    .bodyToMono(AiRecommendResponse.class)
-                    .block(Duration.ofSeconds(3));
+            AiRecommendRequest request = new AiRecommendRequest(mediaId, tags);
 
-            return response != null && response.destinationIds() != null
-                    ? response.destinationIds()
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            HttpEntity<AiRecommendRequest> entity = new HttpEntity<>(request, headers);
+
+            log.info("Sending AI request: {}", request);
+
+            ResponseEntity<AiRecommendResponse> response = aiRestTemplate.postForEntity(
+                    "/api/recommendation/content-based",
+                    entity,
+                    AiRecommendResponse.class
+            );
+
+            log.info("Received AI response: {}", response.getBody());
+
+            return response.getBody() != null && response.getBody().destinationIds() != null
+                    ? response.getBody().destinationIds()
                     : List.of();
 
         } catch (Exception e) {

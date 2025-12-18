@@ -38,6 +38,15 @@ public class Destination {
     @Column(name = "google_street_view_url")
     private String googleStreetViewUrl;
 
+    @Column(name = "image_url")
+    private String imageUrl;
+
+    @Column(name = "latitude")
+    private Double latitude;
+
+    @Column(name = "longitude")
+    private Double longitude;
+
     public static Destination of(
             Media media,
             String name,
@@ -51,6 +60,28 @@ public class Destination {
         dest.address = address;
         dest.description = description;
         dest.tags = toString(tags);
+        return dest;
+    }
+
+    public static Destination of(
+            Media media,
+            String name,
+            String address,
+            String description,
+            Double latitude,
+            Double longitude,
+            List<String> tags,
+            String imageUrl
+    ) {
+        Destination dest = new Destination();
+        dest.media = media;
+        dest.name = name;
+        dest.address = address;
+        dest.description = description;
+        dest.latitude = latitude;
+        dest.longitude = longitude;
+        dest.tags = toString(tags);
+        dest.imageUrl = imageUrl;
         return dest;
     }
 

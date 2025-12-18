@@ -11,6 +11,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class UserService {
 
     private final UserRepository userRepository;
@@ -30,7 +31,15 @@ public class UserService {
         User user = userRepository.findBySessionId(sessionId)
                 .orElseThrow(() -> new IllegalStateException("User not found"));
 
-        List<String> userTags = List.of(request.gender(), request.ageGroup(), request.genre(), request.travelStyle());
+        List<String> userTags = java.util.stream.Stream.of(
+                request.gender(),
+                request.ageGroup(),
+                request.genre(),
+                request.travelStyle()
+        )
+        .filter(java.util.Objects::nonNull)
+        .toList();
+
         user.setTags(userTags);
     }
 }

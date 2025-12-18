@@ -17,9 +17,16 @@ public class Media {
     @Column(name = "title", nullable = false)
     private String title;
 
+    @Column(name = "poster_url")
+    private String posterUrl;
+
+    @Column(name = "media_url")
+    private String mediaUrl;
+
     public static Media of(String title, String type, String posterUrl) {
         Media media = new Media();
         media.title = title;
+        media.posterUrl = posterUrl;
         return media;
     }
 }
