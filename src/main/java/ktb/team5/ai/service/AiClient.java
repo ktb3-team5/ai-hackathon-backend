@@ -22,7 +22,7 @@ public class AiClient {
     public List<Long> recommendDestinations(Long mediaId, List<String> tags) {
         try {
             AiRecommendResponse response = aiWebClient.post()
-                    .uri("/api/recommend/destinations") // FIXME
+                    .uri("/api/recommendation/content-based")
                     .bodyValue(new AiRecommendRequest(mediaId, tags))
                     .retrieve()
                     .onStatus(
