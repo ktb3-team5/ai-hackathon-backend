@@ -1,0 +1,80 @@
+name: Backend CI/CD
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@v1.0.3
+        env:
+          DB_URL: ${{ secrets.DB_URL }}
+          DB_USERNAME: ${{ secrets.DB_USERNAME }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          NAVER_MAPS_KEY_ID: ${{ secrets.NAVER_MAPS_KEY_ID }}
+          NAVER_MAPS_KEY: ${{ secrets.NAVER_MAPS_KEY }}
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          envs: DB_URL,DB_USERNAME,DB_PASSWORD,OPENAI_API_KEY,NAVER_MAPS_KEY_ID,NAVER_MAPS_KEY
+          script: |
+            set -e
+
+            echo "===== 1. 프로젝트 클론/업데이트 ====="
+            APP_DIR="/home/ubuntu/ai-hackathon-backend"
+            REPO_URL="https://github.com/ktb3-team5/ai-hackathon-backend.git"
+            BRANCH="feat/cicd"
+
+            if [ ! -d "$APP_DIR" ]; then
+              git clone -b $BRANCH $REPO_URL $APP_DIR
+            fi
+
+            cd $APP_DIR
+            git fetch origin
+            git checkout $BRANCH
+            git reset --hard origin/$BRANCH
+
+            echo "===== 2. Docker 이미지 빌드 ====="
+            docker build -t backend:latest .
+
+            echo "===== 3. 기존 컨테이너 정리 ====="
+            docker stop backend || true
+            docker rm backend || true
+
+            echo "===== 4. 새 컨테이너 실행 ====="
+            docker run -d \
+              --name backend \
+              --restart unless-stopped \
+              -p 8080:8080 \
+              -e SPRING_PROFILES_ACTIVE=prod \
+              -e SPRING_DATASOURCE_URL="$DB_URL" \
+              -e SPRING_DATASOURCE_USERNAME="$DB_USERNAME" \
+              -e SPRING_DATASOURCE_PASSWORD="$DB_PASSWORD" \
+              -e OPENAI_API_KEY="$OPENAI_API_KEY" \
+              -e NAVER_MAPS_KEY_ID="$NAVER_MAPS_KEY_ID" \
+              -e NAVER_MAPS_KEY="$NAVER_MAPS_KEY" \
+              backend:latest
+
+            echo "===== 5. 컨테이너 시작 대기 ====="
+            sleep 10
+
+            echo "===== 6. 컨테이너 상태 확인 ====="
+            docker ps | grep backend
+
+            echo "===== 7. 로그 확인 ====="
+            docker logs --tail 30 backend
+
+            echo "===== 8. 정리 ====="
+            docker image prune -af
+
+            echo ""
+            echo "=========================================="
+            echo "✅ 배포 완료!"
+            echo "=========================================="
+            echo "백엔드 서버: http://3.34.178.178:8080"
