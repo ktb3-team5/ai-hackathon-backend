@@ -10,7 +10,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: create-drop   # 로컬 / 해커톤용
+      ddl-auto: update   # 로컬 / 해커톤용
     show-sql: true
     properties:
       hibernate:
