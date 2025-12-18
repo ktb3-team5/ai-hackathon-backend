@@ -23,11 +23,11 @@ public class UserController {
 
     @PostMapping("/me/tags")
     @ResponseStatus(HttpStatus.CREATED)
-    public void createUserPreferences(
+    public void createUserTags(
             HttpServletRequest httpRequest,
             @RequestBody CreateUserTagsRequest request
     ) {
         String sessionId = httpRequest.getSession(false).getId(); // 기존 세션이 없으면 null 반환
-        userService.createUserPreferences(sessionId, request);
+        userService.createUserTags(sessionId, request);
     }
 }

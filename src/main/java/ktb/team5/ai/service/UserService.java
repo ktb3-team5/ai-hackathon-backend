@@ -6,6 +6,8 @@ import ktb.team5.ai.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class UserService {
@@ -21,10 +23,11 @@ public class UserService {
         userRepository.save(user);
     }
 
-    public void createUserPreferences(String sessionId, CreateUserTagsRequest request) {
+    public void createUserTags(String sessionId, CreateUserTagsRequest request) {
         User user = userRepository.findBySessionId(sessionId)
                 .orElseThrow(() -> new IllegalStateException("User not found"));
 
-        user.setTags(request.tags());
+        List<String> userTags = List.of(request.gender(), request.ageGroup(), request.genre(), request.travelStyle());
+        user.setTags(userTags);
     }
 }
