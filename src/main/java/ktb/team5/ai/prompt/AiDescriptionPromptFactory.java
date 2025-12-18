@@ -12,45 +12,61 @@ import java.util.List;
 public class AiDescriptionPromptFactory {
 
     public Prompt createPrompt(
+            String mediaName,
             String destName,
             List<String> destTags,
             List<String> userTags
     ){
         return new Prompt(
-                systemMessages(),
-                userMessage(destName, destTags, userTags)
+                systemMessage(),
+                userMessage(mediaName, destName, destTags, userTags)
         );
     }
 
-    private SystemMessage systemMessages() {
+    private SystemMessage systemMessage() {
         return new SystemMessage("""
-            You are a professional travel content writer specializing in Korean destinations.
-            Write vivid, engaging descriptions that highlight Korean cultural context and emotional atmosphere.
-            Your goal is to persuade international travelers to want to visit the place.
-    
-            Do NOT invent facts.
-            Use only the information provided in the input.
-            Write the response in natural, fluent English.
-            """);
+        You are a professional travel storyteller specializing in Korean destinations.
+        Your task is to connect the emotional experience of a Korean movie, drama, or show
+        with the real-life experience of visiting a place.
+
+        Highlight how the atmosphere, mood, or feeling conveyed by the media
+        can be experienced again at the destination.
+        
+        Treat the media as an emotional reference only.
+        Do NOT imply that events or stories from the media actually happened at the location.
+
+        Persuade international travelers by evoking emotion, not by listing facts.
+        Do NOT invent facts. Use only the provided information.
+        Write in natural, fluent English.
+        """);
     }
 
     private UserMessage userMessage(
+            String mediaName,
             String destName,
             List<String> destTags,
             List<String> userTags
     ) {
         return new UserMessage("""
-        Place name: %s
-        Place keywords: %s
+        Media title: %s
+        Destination name: %s
+        Destination keywords: %s
         User preference keywords: %s
 
-        Based on the information above,
-        write a travel description in 1–2 sentences.
+        Using the emotional tone and atmosphere suggested by the media,
+        describe how visiting this destination allows the traveler
+        to relive or resonate with that feeling in real life.
+        
+        Keep the description grounded in real visitor experience.
+        Avoid overly poetic or abstract expressions.
+
+        Limit the response to a maximum of 30 words.
+        Use no more than two sentences.
         """.formatted(
+                mediaName,
                 destName,
                 String.join(", ", destTags),
                 String.join(", ", userTags)
         ));
     }
-
 }

@@ -17,6 +17,7 @@ public class AiService {
 
     public String generateDescription(AiDescriptionRequest request) {
         Prompt prompt = promptFactory.createPrompt(
+                request.mediaName(),
                 request.destName(),
                 request.destTags(),
                 request.userTags()
