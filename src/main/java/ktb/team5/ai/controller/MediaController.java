@@ -42,11 +42,4 @@ public class MediaController {
         String sessionId = session.getId();
         return destinationService.getTop3RecommendedDestinations(sessionId, mediaId);
     }
-
-    @GetMapping
-    public List<MediaResponse> getMedia(HttpServletRequest httpRequest) {
-        String sessionId = httpRequest.getSession(false).getId();
-
-        return mediaService.getMediaByTags(sessionId);
-    }
 }

@@ -93,22 +93,4 @@ public class MediaService {
                         .build()
         );
     }
-
-    public List<MediaResponse> getMediaByTags(String sessionId) {
-
-        User user = userRepository.findBySessionId(sessionId)
-                .orElse(null);
-
-        if (user == null) {
-            throw new RuntimeException("사용자가 없습니다.");
-        }
-
-        List<String> tags = user.getTags();
-
-        if (tags.isEmpty()) {
-            throw new RuntimeException("사용자 태그가 없습니다.");
-        }
-
-        return aiClient.recommendMedia(tags);
-    }
 }
