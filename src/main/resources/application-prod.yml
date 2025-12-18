@@ -21,7 +21,7 @@ spring:
         options:
           model: gpt-4o-mini
 
-  naver:
-    maps:
-      key-id: ${NAVER_MAPS_KEY_ID}
-      key: ${NAVER_MAPS_KEY}
+naver:
+  maps:
+    key-id: ${NAVER_MAPS_KEY_ID}
+    key: ${NAVER_MAPS_KEY}
