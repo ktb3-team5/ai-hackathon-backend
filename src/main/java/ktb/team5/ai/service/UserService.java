@@ -12,7 +12,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserService {
 
-    UserRepository userRepository;
+    private final UserRepository userRepository;
 
     public void createUser(String sessionId) {
         if (userRepository.findBySessionId(sessionId).isPresent()) {
