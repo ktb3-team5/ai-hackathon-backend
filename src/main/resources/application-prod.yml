@@ -14,5 +14,14 @@ spring:
       hibernate:
         format_sql: true
 
-  profiles:
-    active: prod
+  ai:
+    openai:
+      api-key: ${OPENAI_API_KEY}
+      chat:
+        options:
+          model: gpt-4o-mini
+
+  naver:
+    maps:
+      key-id: ${NAVER_MAPS_KEY_ID}
+      key: ${NAVER_MAPS_KEY}

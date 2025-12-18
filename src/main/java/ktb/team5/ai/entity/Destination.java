@@ -34,6 +34,7 @@ public class Destination {
     @Column(name = "tags")
     private String tags;
 
+    @Setter
     @Column(name = "google_street_view_url")
     private String googleStreetViewUrl;
 
