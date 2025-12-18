@@ -5,6 +5,7 @@ import ktb.team5.ai.entity.User;
 import ktb.team5.ai.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -14,6 +15,7 @@ public class UserService {
 
     private final UserRepository userRepository;
 
+    @Transactional
     public void createUser(String sessionId) {
         if (userRepository.findBySessionId(sessionId).isPresent()) {
             return;
@@ -23,6 +25,7 @@ public class UserService {
         userRepository.save(user);
     }
 
+    @Transactional
     public void createUserTags(String sessionId, CreateUserTagsRequest request) {
         User user = userRepository.findBySessionId(sessionId)
                 .orElseThrow(() -> new IllegalStateException("User not found"));

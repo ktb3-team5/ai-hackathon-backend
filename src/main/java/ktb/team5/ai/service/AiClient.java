@@ -4,6 +4,7 @@ import ktb.team5.ai.dto.AiRecommendRequest;
 import ktb.team5.ai.dto.AiRecommendResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -17,6 +18,7 @@ import java.util.List;
 @Slf4j
 public class AiClient {
 
+    @Qualifier("aiWebClient")
     private final WebClient aiWebClient;
 
     public List<Long> recommendDestinations(Long mediaId, List<String> tags) {
