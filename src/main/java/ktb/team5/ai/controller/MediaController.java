@@ -29,8 +29,8 @@ public class MediaController {
         return mediaService.getTop10Media();
     }
 
-    @GetMapping("{mediaId}/destinations/top5")
-    public List<DestinationsResponse> getTop5Destinations(
+    @GetMapping("{mediaId}/destinations/top3")
+    public List<DestinationsResponse> getTop3Destinations(
             @PathVariable Long mediaId,
             HttpServletRequest httpRequest
     ) {
@@ -40,7 +40,7 @@ public class MediaController {
         }
 
         String sessionId = session.getId();
-        return destinationService.getTop5Destinations(sessionId, mediaId);
+        return destinationService.getTop3RecommendedDestinations(sessionId, mediaId);
     }
 
     @GetMapping
