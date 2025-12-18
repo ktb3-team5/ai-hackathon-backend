@@ -9,4 +9,6 @@ import java.util.List;
 @Repository
 public interface DestinationRepository extends JpaRepository<Destination, Long> {
     List<Destination> findByMediaId(Long mediaId);
+
+    List<Destination> findByIdIn(List<Long> destinationIds);
 }
