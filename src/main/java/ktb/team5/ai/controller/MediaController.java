@@ -51,6 +51,6 @@ public class MediaController {
             throw new IllegalStateException("Session not found");
         }
 
-        return destinationService.getDestinations(mediaId);
+        return destinationService.getTop3RecommendedDestinations(session.getId(), mediaId);
     }
 }

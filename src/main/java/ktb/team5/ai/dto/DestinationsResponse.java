@@ -1,4 +1,10 @@
 package ktb.team5.ai.dto;
 
-public record DestinationsResponse(String name, String address, String description, String imageUrl, String googleStreetViewUrl) {
+public record DestinationsResponse(
+        String name,
+        String address,
+        String description,
+        String imageUrl,
+        String googleStreetViewUrl
+) {
 }
