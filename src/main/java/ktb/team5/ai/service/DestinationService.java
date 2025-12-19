@@ -8,6 +8,7 @@ import ktb.team5.ai.repository.DestinationRepository;
 import ktb.team5.ai.repository.MediaRepository;
 import ktb.team5.ai.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class DestinationService {
@@ -48,10 +50,18 @@ public class DestinationService {
 
         // 구글 스트릿뷰 링크 추가
         destinations.forEach(destination -> {
+            // 구글 스트리트뷰 URL이 없는 경우
             if (destination.getGoogleStreetViewUrl() == null
                     || destination.getGoogleStreetViewUrl().isEmpty()) {
-                NaverGeocodeResponse response = naverMapsClient.geocode(destination.getAddress());
+
+                String targetAddress = destination.getKorAddress();
+                log.warn("타겟 주소: [{}], target주소 NULL :[{}]", targetAddress,(targetAddress==null));
+                NaverGeocodeResponse response = naverMapsClient.geocode(targetAddress);
+
+                // [로그 추가 부분] 실패 조건 확인
                 if (response == null || response.getAddresses().isEmpty()) {
+                    log.warn("지오코딩 조회 실패 - 주소: [{}], Response Null 여부: [{}]",
+                            targetAddress, (response == null));
                     return;
                 }
 

@@ -40,6 +40,10 @@ public class WebClientConfig {
                 .defaultHeader("X-NCP-APIGW-API-KEY-ID", keyId)
                 .defaultHeader("X-NCP-APIGW-API-KEY", key)
                 .defaultHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
+                .defaultHeader(HttpHeaders.ACCEPT_CHARSET, "UTF-8")  // 추가
+                .codecs(configurer -> configurer
+                        .defaultCodecs()
+                        .maxInMemorySize(16 * 1024 * 1024))  // 버퍼 크기 증가
                 .build();
     }
 }

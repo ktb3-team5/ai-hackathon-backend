@@ -28,6 +28,10 @@ public class Destination {
     @Column(name = "address")
     private String address;
 
+    @Setter
+    @Column(name = "address_kr")
+    private String KorAddress;
+
     @Column(name = "description")
     private String description;
 
