@@ -19,7 +19,7 @@ COPY src src
 RUN ./gradlew clean bootJar --no-daemon -x test
 
 # 2단계: 실행 스테이지
-FROM openjdk:21-jdk-slim
+FROM eclipse-temurin:21-jre-alpine
 
 WORKDIR /app
 
