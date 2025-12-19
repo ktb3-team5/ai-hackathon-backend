@@ -1,5 +1,5 @@
 # 1단계: 빌드 스테이지
-FROM gradle:8.5-jdk17 AS builder
+FROM gradle:8.14-jdk21 AS builder
 
 WORKDIR /app
 
@@ -15,11 +15,11 @@ RUN chmod +x gradlew
 # 소스 코드 복사
 COPY src src
 
-# 빌드 실행 (테스트 스킵, 캐시 정리 포함)
+# 빌드 실행 (테스트 스킵)
 RUN ./gradlew clean bootJar --no-daemon -x test
 
 # 2단계: 실행 스테이지
-FROM openjdk:17-jdk-slim
+FROM openjdk:21-jdk-slim
 
 WORKDIR /app
 
